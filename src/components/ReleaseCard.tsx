@@ -260,6 +260,8 @@ export default function ReleaseCard({
     // Call the API to update the backend
     try {
       await onTaskPriorityUpdate(taskId, newPriority);
+      setAnimatingTaskId(taskId);
+      setTimeout(() => setAnimatingTaskId(null), 500);
       toast.success(`Task priority updated to ${newPriority + 1}`);
     } catch (error) {
       // Revert the UI change if the API call fails
@@ -433,7 +435,7 @@ export default function ReleaseCard({
           <span className="text-blue-300 font-medium">Promotion Tasks</span>
         </div>
         <div className="flex items-center space-x-3">
-          {/* Task counter badge */}
+          {/* Task counter badge - keep this in the button */}
           {totalTasks > 0 && (
             <div className="flex items-center space-x-3">
               <span className="px-2.5 py-1 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-full text-xs font-medium">
@@ -574,43 +576,52 @@ export default function ReleaseCard({
                     </span>
                   )}
                 </div>
-                <div className="flex items-start space-x-3 flex-shrink-0 ml-2">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                      task.priority
-                    )}`}
+
+                {/* Task Priority */}
+                <div className="flex-shrink-0 flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      if (task.priority > TaskPriority.Urgent) {
+                        handlePriorityUpdate(task.taskId, task.priority - 1);
+                      }
+                    }}
+                    className="text-gray-600 hover:text-white transition-colors p-1 focus:outline-none rounded"
+                    disabled={task.priority <= TaskPriority.Urgent}
+                    aria-label="Increase priority"
                   >
-                    Priority&nbsp;{task.priority + 1}
-                  </span>
-                  <div className="flex flex-col">
-                    <button
-                      onClick={() =>
-                        handlePriorityUpdate(task.taskId, task.priority - 1)
-                      }
-                      disabled={task.priority === 0}
-                      className="text-gray-600 hover:text-gray-300 disabled:opacity-50 disabled:hover:text-gray-600 transition-colors"
-                    >
-                      <ChevronUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() =>
-                        handlePriorityUpdate(task.taskId, task.priority + 1)
-                      }
-                      disabled={task.priority === 3}
-                      className="text-gray-600 hover:text-gray-300 disabled:opacity-50 disabled:hover:text-gray-600 transition-colors"
-                    >
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
+                    <ChevronUp className="w-4 h-4" aria-hidden="true" />
+                  </button>
+
+                  <div
+                    className={`px-2 py-1 rounded-md text-xs ${getPriorityColor(
+                      task.priority as TaskPriority
+                    )}`}
+                    aria-label={`Priority: ${task.priority + 1}`}
+                  >
+                    {task.priority + 1}
                   </div>
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => handleDeleteTask(task.taskId)}
-                      className="text-gray-500 hover:text-red-400 transition-colors focus:outline-none p-1 ml-1 rounded-full hover:bg-red-500/10"
-                      title="Delete task"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (task.priority < TaskPriority.Low) {
+                        handlePriorityUpdate(task.taskId, task.priority + 1);
+                      }
+                    }}
+                    className="text-gray-600 hover:text-white transition-colors p-1 focus:outline-none rounded"
+                    disabled={task.priority >= TaskPriority.Low}
+                    aria-label="Decrease priority"
+                  >
+                    <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => handleDeleteTask(task.taskId)}
+                    className="text-gray-500 hover:text-red-400 transition-colors focus:outline-none p-1 ml-1 rounded-full hover:bg-red-500/10"
+                    title="Delete task"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 {/* Celebration container */}
@@ -625,6 +636,44 @@ export default function ReleaseCard({
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Progress bar at bottom of task list */}
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-gray-500 text-xs">Task Progress</span>
+                <span className="text-gray-400 text-xs font-medium">
+                  {completedTasks} of {totalTasks} completed
+                </span>
+              </div>
+              <div className="w-full bg-black rounded-full h-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${
+                    totalTasks === 0
+                      ? "bg-gray-700"
+                      : completedTasks === totalTasks
+                      ? "bg-emerald-500"
+                      : "bg-blue-500"
+                  }`}
+                  style={{
+                    width: `${
+                      totalTasks === 0
+                        ? 0
+                        : Math.round((completedTasks / totalTasks) * 100)
+                    }%`,
+                  }}
+                  role="progressbar"
+                  aria-valuenow={
+                    totalTasks === 0
+                      ? 0
+                      : Math.round((completedTasks / totalTasks) * 100)
+                  }
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

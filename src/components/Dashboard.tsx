@@ -121,7 +121,6 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
 
             {/* Music-themed Image - Hidden on mobile, visible on md and up */}
             <div className="hidden md:block md:w-[30%] flex-shrink-0 relative self-center">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-xl rounded-2xl"></div>
               <div className="relative overflow-hidden rounded-2xl shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A] z-10"></div>
                 <div className="absolute inset-0 bg-gradient-to-l from-[#0A0A0A] via-transparent to-[#0A0A0A] z-10"></div>
