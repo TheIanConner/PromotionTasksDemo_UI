@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api": {
-          target: env.VITE_API_URL || "http://localhost:5110",
+          target:
+            "https://promotiontasksdemo-api-bvdudegdachcdddb.uksouth-01.azurewebsites.net", // || "http://localhost:5110",
           changeOrigin: true,
           secure: false,
         },
