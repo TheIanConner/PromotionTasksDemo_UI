@@ -53,5 +53,26 @@ A web application for music artists and labels to manage their release promotion
 
 1. Clone the repository
 2. Install dependencies with `npm install` or `yarn install`
-3. Start the development server with `npm run dev` or `yarn dev`
-4. Open the URL shown by Vite in your browser
+3. Copy `.env.example` to `.env` and update the API URL as needed
+4. Start the development server with `npm run dev` or `yarn dev`
+5. Open the URL shown by Vite in your browser
+
+### Environment Variables
+
+This application uses the following environment variables:
+
+- `VITE_API_URL`: The URL of the API server (defaults to http://localhost:5110 if not set)
+
+For local development, variables are loaded from the `.env` file. In production environments like GitHub or Azure App Services, configure these as environment variables in your deployment settings.
+
+Note: Variables must be prefixed with `VITE_` to be accessible by the application.
+
+### Building for Production
+
+To build the application for production:
+
+```bash
+npm run build
+```
+
+This creates a `build` directory with the production-ready files that can be deployed to any static hosting service.
