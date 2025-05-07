@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ListTodo,
   Trash2,
+  Plus,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import TaskCelebration from "./TaskCelebration";
@@ -28,6 +29,7 @@ interface ReleaseCardProps {
   onTaskStatusUpdate: (taskId: number, status: TaskStatus) => void;
   onTaskPriorityUpdate: (taskId: number, priority: number) => void;
   onTaskUpdate: (task: PromotionTask) => void;
+  onTaskCreate: (task: Omit<PromotionTask, "taskId">) => Promise<PromotionTask>;
 }
 
 const generatePlaceholderArt = (
@@ -141,6 +143,7 @@ export default function ReleaseCard({
   onTaskStatusUpdate,
   onTaskPriorityUpdate,
   onTaskUpdate,
+  onTaskCreate,
 }: ReleaseCardProps) {
   const [tasks, setTasks] = useState<PromotionTask[]>(
     release.promotionTasks?.sort((a, b) => a.priority - b.priority) || []
@@ -152,6 +155,9 @@ export default function ReleaseCard({
   const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState(TaskPriority.Low);
 
   // Calculate task statistics
   const completedTasks = tasks.filter(
@@ -348,6 +354,34 @@ export default function ReleaseCard({
     }
   };
 
+  const handleAddTask = async () => {
+    if (!newTaskDescription.trim()) {
+      toast.error("Task description cannot be empty");
+      return;
+    }
+
+    const newTask: Omit<PromotionTask, "taskId"> = {
+      releaseId: release.releaseId,
+      status: TaskStatus.ToDo,
+      priority: newTaskPriority,
+      description: newTaskDescription.trim(),
+      deleted: false,
+    };
+
+    try {
+      const createdTask = await onTaskCreate(newTask);
+      setTasks((prevTasks) =>
+        [...prevTasks, createdTask].sort((a, b) => a.priority - b.priority)
+      );
+      setNewTaskDescription("");
+      setIsAddingTask(false);
+      setNewTaskPriority(TaskPriority.Low);
+      toast.success("New task added successfully");
+    } catch (error) {
+      toast.error("Failed to add new task");
+    }
+  };
+
   return (
     <div className="bg-[#111111] border border-gray-800 rounded-2xl p-6 backdrop-blur-xl transition-colors hover:border-gray-700">
       {/* Generated Graphic with Album Art */}
@@ -417,6 +451,78 @@ export default function ReleaseCard({
         </div>
       </button>
 
+      {/* Add Task Button - Always visible */}
+      <div className="mb-3">
+        {isAddingTask ? (
+          <div className="bg-[#0D0D0D] border border-blue-500/20 rounded-xl p-3">
+            <textarea
+              value={newTaskDescription}
+              onChange={(e) => setNewTaskDescription(e.target.value)}
+              placeholder="Enter task description..."
+              className="w-full bg-[#1A1A1A] text-gray-300 px-3 py-2 rounded border border-gray-700 focus:outline-none focus:border-blue-500 resize-none mb-3"
+              rows={3}
+              autoFocus
+            />
+            <div className="flex flex-wrap items-center justify-between mb-3">
+              <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                <span className="text-gray-400 text-sm">Priority:</span>
+                {[
+                  TaskPriority.Low,
+                  TaskPriority.Medium,
+                  TaskPriority.High,
+                  TaskPriority.Urgent,
+                ].map((priority) => (
+                  <button
+                    key={priority}
+                    onClick={() => setNewTaskPriority(priority)}
+                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                      newTaskPriority === priority
+                        ? getPriorityColor(priority) +
+                          " ring-2 ring-offset-1 ring-offset-[#0D0D0D] ring-opacity-60"
+                        : "bg-gray-800 text-gray-400"
+                    }`}
+                  >
+                    {priority === TaskPriority.Low
+                      ? "Low"
+                      : priority === TaskPriority.Medium
+                      ? "Medium"
+                      : priority === TaskPriority.High
+                      ? "High"
+                      : "Urgent"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setIsAddingTask(false);
+                  setNewTaskDescription("");
+                  setNewTaskPriority(TaskPriority.Low);
+                }}
+                className="px-3 py-1 text-sm text-gray-400 bg-[#0A0A0A] hover:bg-[#161616] rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddTask}
+                className="px-3 py-1 text-sm text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-md transition-colors"
+              >
+                Add Task
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsAddingTask(true)}
+            className="flex items-center justify-center w-full px-4 py-2 text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-xl transition-colors"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            <span>Add New Task</span>
+          </button>
+        )}
+      </div>
+
       {showTasks && (
         <div className="mt-4 mb-2">
           <div className="space-y-3 bg-[#0D0D0D]">
@@ -454,7 +560,11 @@ export default function ReleaseCard({
                     />
                   ) : (
                     <span
-                      className="text-gray-300 group-hover:text-white transition-colors cursor-pointer hover:underline flex-1 break-words whitespace-normal"
+                      className={`text-gray-300 group-hover:text-white transition-colors cursor-pointer hover:underline flex-1 break-words whitespace-normal ${
+                        task.status === TaskStatus.Done
+                          ? "line-through text-gray-500"
+                          : ""
+                      }`}
                       style={{ wordBreak: "break-word" }}
                       onClick={() =>
                         startEditingTask(task.taskId, task.description)

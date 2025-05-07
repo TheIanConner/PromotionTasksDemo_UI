@@ -65,6 +65,16 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     }
   };
 
+  const handleTaskCreate = async (task: Omit<PromotionTask, "taskId">) => {
+    try {
+      const createdTask = await api.createPromotionTask(task);
+      return createdTask;
+    } catch (err) {
+      setError("Failed to create task");
+      throw err; // Re-throw to allow ReleaseCard to handle the error
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
@@ -150,6 +160,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 onTaskStatusUpdate={handleTaskStatusUpdate}
                 onTaskPriorityUpdate={handleTaskPriorityUpdate}
                 onTaskUpdate={handleTaskUpdate}
+                onTaskCreate={handleTaskCreate}
               />
             ))}
           </div>
