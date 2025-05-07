@@ -78,7 +78,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="text-blue-400">Loading...</div>
+        <div className="text-blue-400" aria-live="polite">
+          Loading...
+        </div>
       </div>
     );
   }
@@ -92,8 +94,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
           <button
             onClick={onLogout}
             className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-black bg-white hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+            aria-label="Logout"
           >
-            <LogOut className="w-4 h-4 mr-1" />
+            <LogOut className="w-4 h-4 mr-1" aria-hidden="true" />
             <span>Logout</span>
           </button>
         </div>
@@ -109,7 +112,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 How it works
               </span>
               <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                Manage your promotion <br /> tasks for your releases
+                Manage promotion <br /> tasks for your releases
               </h1>
               <p className="text-gray-400 text-lg leading-relaxed">
                 Un:hurd works around the clock so you don't have to. From
@@ -120,10 +123,16 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             </div>
 
             {/* Music-themed Image - Hidden on mobile, visible on md and up */}
-            <div className="hidden md:block md:w-[30%] flex-shrink-0 relative self-center">
+            <div className="hidden md:block md:w-[22.5%] flex-shrink-0 relative self-center">
               <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A] z-10"></div>
-                <div className="absolute inset-0 bg-gradient-to-l from-[#0A0A0A] via-transparent to-[#0A0A0A] z-10"></div>
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A] z-10"
+                  aria-hidden="true"
+                ></div>
+                <div
+                  className="absolute inset-0 bg-gradient-to-l from-[#0A0A0A] via-transparent to-[#0A0A0A] z-10"
+                  aria-hidden="true"
+                ></div>
                 <img
                   src="https://img.freepik.com/premium-photo/young-female-musician-headphones-performing-dark-background-neon-light-concept-music-hobby-festival-entertainment-emotions-neoned-modern-artwork_1028938-461020.jpg"
                   alt="Musician with headphones in neon lighting"
@@ -135,19 +144,29 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         </section>
 
         {/* Releases Section */}
-        <section className="max-w-7xl mx-auto px-6 py-6">
+        <section
+          className="max-w-7xl mx-auto px-6 py-6"
+          aria-labelledby="releases-heading"
+        >
           <div className="mb-4">
-            <h2 className="inline-block text-blue-400 text-sm font-medium tracking-wider uppercase">
+            <h2
+              id="releases-heading"
+              className="inline-block text-blue-400 text-sm font-medium tracking-wider uppercase"
+            >
               Your Releases
             </h2>
           </div>
           <div className="mb-6">
-            <h2 className="text-gray-400 text-lg leading-relaxed">
+            <p className="text-gray-400 text-lg leading-relaxed">
               Manage your promotion tasks for each release
-            </h2>
+            </p>
           </div>
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl mb-6">
+            <div
+              className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl mb-6"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </div>
           )}
@@ -164,7 +183,10 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             ))}
           </div>
           {releases.length === 0 && (
-            <div className="text-center text-gray-400 mt-8 p-8 border border-gray-800 rounded-2xl bg-[#111111]">
+            <div
+              className="text-center text-gray-400 mt-8 p-8 border border-gray-800 rounded-2xl bg-[#111111]"
+              aria-live="polite"
+            >
               No releases found. Create your first release to get started!
             </div>
           )}
@@ -175,10 +197,18 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       <footer className="bg-black py-6 mt-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
           <div className="flex space-x-6 mb-4 md:mb-0">
-            <a href="#" className="text-gray-400 hover:text-white text-sm">
+            <a
+              href="#"
+              className="text-gray-400 hover:text-white text-sm"
+              aria-label="Terms and conditions"
+            >
               Terms and conditions
             </a>
-            <a href="#" className="text-gray-400 hover:text-white text-sm">
+            <a
+              href="#"
+              className="text-gray-400 hover:text-white text-sm"
+              aria-label="Privacy Policy"
+            >
               Privacy Policy
             </a>
           </div>
@@ -192,6 +222,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 className="w-5 h-5 fill-current"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 448 512"
+                aria-hidden="true"
               >
                 <path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" />
               </svg>

@@ -41,10 +41,11 @@ export default function Login({ onLogin }: LoginProps) {
           backgroundPosition: "center",
           filter: "blur(2px) brightness(0.4)",
         }}
+        aria-hidden="true"
       ></div>
 
       {/* Neon light overlay effects */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
         <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-blue-500/20 blur-3xl"></div>
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-purple-500/20 blur-3xl"></div>
@@ -53,14 +54,18 @@ export default function Login({ onLogin }: LoginProps) {
 
       <div className="max-w-md w-full relative z-10">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
             Welcome to the Un:Hurd promotion portal
-          </h2>
+          </h1>
           <p className="mt-3 text-gray-400">Sign in to manage your releases</p>
         </div>
 
         <div className="bg-[#111111]/80 border border-gray-800/50 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form
+            className="space-y-6"
+            onSubmit={handleSubmit}
+            aria-labelledby="login-form"
+          >
             <div className="space-y-4">
               <div>
                 <label
@@ -78,6 +83,8 @@ export default function Login({ onLogin }: LoginProps) {
                   placeholder="Test McApp"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  aria-required="true"
+                  aria-invalid={!!error}
                 />
               </div>
               <div>
@@ -96,12 +103,18 @@ export default function Login({ onLogin }: LoginProps) {
                   placeholder="Enter anything!"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  aria-required="true"
+                  aria-invalid={!!error}
                 />
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl text-sm text-center">
+              <div
+                className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl text-sm text-center"
+                role="alert"
+                aria-live="assertive"
+              >
                 {error}
               </div>
             )}
@@ -110,6 +123,7 @@ export default function Login({ onLogin }: LoginProps) {
               type="submit"
               disabled={isLoading}
               className="w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#111111] disabled:opacity-50 disabled:hover:from-blue-500 disabled:hover:to-purple-600 disabled:cursor-not-allowed transition-all duration-200"
+              aria-busy={isLoading}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
@@ -118,6 +132,7 @@ export default function Login({ onLogin }: LoginProps) {
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <circle
                       className="opacity-25"
