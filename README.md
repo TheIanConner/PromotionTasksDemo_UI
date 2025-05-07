@@ -33,14 +33,12 @@ A web application for music artists and labels to manage their release promotion
 
 **UI/UX Improvements**
 
-- Make the login page more artistic
 - Add dark/light theme toggle
 - Implement skeleton loading states
 - (Out of scope for demo) Create a guided onboarding experience for new users
 
 **Feature Additions**
 
-- Add ability to edit / remove tasks
 - Add ability to create custom promotion tasks
 
 **Technical Improvements**

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { User, Release, TaskStatus } from "../types";
+import { User, Release, TaskStatus, PromotionTask } from "../types";
 import { api } from "../api/client";
 import ReleaseCard from "./ReleaseCard";
 import { LogOut } from "lucide-react";
@@ -51,6 +51,16 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       // No need to reload all data, the UI is updated immediately in ReleaseCard
     } catch (err) {
       setError("Failed to update task priority");
+      throw err; // Re-throw to allow ReleaseCard to handle the error
+    }
+  };
+
+  const handleTaskUpdate = async (task: PromotionTask) => {
+    try {
+      await api.updateTask(task);
+      // No need to reload all data, the UI is updated immediately in ReleaseCard
+    } catch (err) {
+      setError("Failed to update task");
       throw err; // Re-throw to allow ReleaseCard to handle the error
     }
   };
@@ -139,6 +149,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 release={release}
                 onTaskStatusUpdate={handleTaskStatusUpdate}
                 onTaskPriorityUpdate={handleTaskPriorityUpdate}
+                onTaskUpdate={handleTaskUpdate}
               />
             ))}
           </div>

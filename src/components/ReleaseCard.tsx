@@ -17,8 +17,8 @@ import {
   Radio,
   Disc3,
   ChevronRight,
-  ChevronDown as ChevronDownIcon,
   ListTodo,
+  Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import TaskCelebration from "./TaskCelebration";
@@ -27,6 +27,7 @@ interface ReleaseCardProps {
   release: Release;
   onTaskStatusUpdate: (taskId: number, status: TaskStatus) => void;
   onTaskPriorityUpdate: (taskId: number, priority: number) => void;
+  onTaskUpdate: (task: PromotionTask) => void;
 }
 
 const generatePlaceholderArt = (
@@ -139,6 +140,7 @@ export default function ReleaseCard({
   release,
   onTaskStatusUpdate,
   onTaskPriorityUpdate,
+  onTaskUpdate,
 }: ReleaseCardProps) {
   const [tasks, setTasks] = useState<PromotionTask[]>(
     release.promotionTasks?.sort((a, b) => a.priority - b.priority) || []
@@ -148,6 +150,8 @@ export default function ReleaseCard({
     null
   );
   const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null);
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const [editText, setEditText] = useState("");
 
   // Calculate task statistics
   const completedTasks = tasks.filter(
@@ -266,6 +270,84 @@ export default function ReleaseCard({
     }
   };
 
+  const startEditingTask = (taskId: number, description: string) => {
+    setEditingTaskId(taskId);
+    setEditText(description);
+  };
+
+  const handleDescriptionUpdate = async (taskId: number) => {
+    // Find the current task
+    const currentTask = tasks.find((task) => task.taskId === taskId);
+    if (!currentTask) return;
+
+    const currentDescription = currentTask.description;
+    if (editText === currentDescription) {
+      setEditingTaskId(null);
+      return;
+    }
+
+    // Create updated task
+    const updatedTask = {
+      ...currentTask,
+      description: editText,
+    };
+
+    // Update UI immediately
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.taskId === taskId ? updatedTask : task))
+    );
+
+    setEditingTaskId(null);
+
+    // Call the API to update the backend
+    try {
+      await onTaskUpdate(updatedTask);
+      toast.success("Task description updated");
+    } catch (error) {
+      // Revert the UI change if the API call fails
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.taskId === taskId
+            ? { ...task, description: currentDescription }
+            : task
+        )
+      );
+      toast.error("Failed to update task description");
+    }
+  };
+
+  const handleDeleteTask = async (taskId: number) => {
+    // Find the current task
+    const currentTask = tasks.find((task) => task.taskId === taskId);
+    if (!currentTask) return;
+
+    // TODO: Add a confirmation modal instead of a simple alert
+    if (!window.confirm("Are you sure you want to delete this task?")) {
+      return;
+    }
+
+    // Create updated task with deleted set to true
+    const updatedTask = {
+      ...currentTask,
+      deleted: true,
+    };
+
+    // Update UI immediately by removing the task
+    setTasks((prevTasks) => prevTasks.filter((task) => task.taskId !== taskId));
+
+    // Call the API to update the backend
+    try {
+      await onTaskUpdate(updatedTask);
+      toast.success("Task deleted successfully");
+    } catch (error) {
+      // Revert the UI change if the API call fails
+      setTasks((prevTasks) =>
+        [...prevTasks, currentTask].sort((a, b) => a.priority - b.priority)
+      );
+      toast.error("Failed to delete task");
+    }
+  };
+
   return (
     <div className="bg-[#111111] border border-gray-800 rounded-2xl p-6 backdrop-blur-xl transition-colors hover:border-gray-700">
       {/* Generated Graphic with Album Art */}
@@ -308,100 +390,141 @@ export default function ReleaseCard({
       {/* Task management toggle button */}
       <button
         onClick={() => setShowTasks(!showTasks)}
-        className="flex items-center justify-between w-full bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 mb-3 hover:border-gray-700 transition-colors"
+        className={`flex items-center justify-between w-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-4 mb-3 hover:border-blue-500/30 transition-all duration-300 ${
+          showTasks ? "shadow-[0_0_15px_rgba(59,130,246,0.2)]" : ""
+        }`}
       >
         <div className="flex items-center space-x-3">
           <ListTodo className="w-5 h-5 text-blue-400" />
-          <span className="text-gray-300">Promotion Tasks</span>
+          <span className="text-blue-300 font-medium">Promotion Tasks</span>
         </div>
         <div className="flex items-center space-x-3">
           {/* Task counter badge */}
           {totalTasks > 0 && (
             <div className="flex items-center space-x-3">
-              <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-medium">
+              <span className="px-2.5 py-1 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded-full text-xs font-medium">
                 {completedTasks} / {totalTasks} completed
               </span>
             </div>
           )}
-          {showTasks ? (
-            <ChevronDownIcon className="w-5 h-5 text-gray-500" />
-          ) : (
-            <ChevronRight className="w-5 h-5 text-gray-500" />
-          )}
+          <div className="bg-blue-500/20 rounded-full p-1">
+            <ChevronRight
+              className={`w-4 h-4 text-blue-300 transition-transform duration-500 ease-in-out ${
+                showTasks ? "transform rotate-90" : ""
+              }`}
+            />
+          </div>
         </div>
       </button>
 
       {showTasks && (
-        <div className="space-y-3">
-          {tasks.map((task) => (
-            <div
-              key={task.taskId}
-              className={`bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 flex items-center justify-between group hover:border-gray-700 transition-colors relative ${
-                animatingTaskId === task.taskId
-                  ? "task-complete-animation task-complete-shimmer"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => handleStatusUpdate(task.taskId, task.status)}
-                  className="focus:outline-none transition-transform hover:scale-110"
-                >
-                  {getStatusIcon(task.status)}
-                </button>
-                <span className="text-gray-300 group-hover:text-white transition-colors">
-                  {task.description}
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ml-1 ${getPriorityColor(
-                    task.priority
-                  )}`}
-                >
-                  Priority&nbsp;{task.priority + 1}
-                </span>
-                <div className="flex flex-col">
+        <div className="mt-4 mb-2">
+          <div className="space-y-3 bg-[#0D0D0D]">
+            {tasks.map((task) => (
+              <div
+                key={task.taskId}
+                className={`bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 flex flex-wrap items-start justify-between group hover:border-gray-700 transition-colors relative ${
+                  animatingTaskId === task.taskId
+                    ? "task-complete-animation task-complete-shimmer"
+                    : ""
+                }`}
+              >
+                <div className="flex items-start space-x-3 flex-1 min-w-0">
                   <button
-                    onClick={() =>
-                      handlePriorityUpdate(task.taskId, task.priority - 1)
-                    }
-                    disabled={task.priority === 0}
-                    className="text-gray-600 hover:text-gray-300 disabled:opacity-50 disabled:hover:text-gray-600 transition-colors"
+                    onClick={() => handleStatusUpdate(task.taskId, task.status)}
+                    className="focus:outline-none transition-transform hover:scale-110 flex-shrink-0 mt-0.5"
                   >
-                    <ChevronUp className="w-4 h-4" />
+                    {getStatusIcon(task.status)}
                   </button>
-                  <button
-                    onClick={() =>
-                      handlePriorityUpdate(task.taskId, task.priority + 1)
-                    }
-                    disabled={task.priority === 3}
-                    className="text-gray-600 hover:text-gray-300 disabled:opacity-50 disabled:hover:text-gray-600 transition-colors"
+                  {editingTaskId === task.taskId ? (
+                    <textarea
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      onBlur={() => handleDescriptionUpdate(task.taskId)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && e.ctrlKey) {
+                          handleDescriptionUpdate(task.taskId);
+                        } else if (e.key === "Escape") {
+                          setEditingTaskId(null);
+                        }
+                      }}
+                      className="flex-1 w-full min-w-0 bg-[#1A1A1A] text-gray-300 px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 resize-none"
+                      rows={3}
+                      autoFocus
+                    />
+                  ) : (
+                    <span
+                      className="text-gray-300 group-hover:text-white transition-colors cursor-pointer hover:underline flex-1 break-words whitespace-normal"
+                      style={{ wordBreak: "break-word" }}
+                      onClick={() =>
+                        startEditingTask(task.taskId, task.description)
+                      }
+                    >
+                      {task.description}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-start space-x-3 flex-shrink-0 ml-2">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                      task.priority
+                    )}`}
                   >
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
+                    Priority&nbsp;{task.priority + 1}
+                  </span>
+                  <div className="flex flex-col">
+                    <button
+                      onClick={() =>
+                        handlePriorityUpdate(task.taskId, task.priority - 1)
+                      }
+                      disabled={task.priority === 0}
+                      className="text-gray-600 hover:text-gray-300 disabled:opacity-50 disabled:hover:text-gray-600 transition-colors"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handlePriorityUpdate(task.taskId, task.priority + 1)
+                      }
+                      disabled={task.priority === 3}
+                      className="text-gray-600 hover:text-gray-300 disabled:opacity-50 disabled:hover:text-gray-600 transition-colors"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => handleDeleteTask(task.taskId)}
+                      className="text-gray-500 hover:text-red-400 transition-colors focus:outline-none p-1 ml-1 rounded-full hover:bg-red-500/10"
+                      title="Delete task"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Celebration container */}
+                <div
+                  id="task-celebration-container"
+                  className="absolute inset-0 overflow-hidden pointer-events-none z-10"
+                >
+                  <TaskCelebration
+                    isActive={celebratingTaskId === task.taskId}
+                    onComplete={() => setCelebratingTaskId(null)}
+                  />
                 </div>
               </div>
-
-              {/* Celebration container */}
-              <div
-                id="task-celebration-container"
-                className="absolute inset-0 overflow-hidden pointer-events-none z-10"
-              >
-                <TaskCelebration
-                  isActive={celebratingTaskId === task.taskId}
-                  onComplete={() => setCelebratingTaskId(null)}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
       {/* No tasks message when list is expanded but empty */}
       {showTasks && tasks.length === 0 && (
-        <div className="text-center text-gray-400 py-6 border border-gray-800 rounded-xl bg-[#0A0A0A]">
-          No tasks found for this release
+        <div className="mt-4 mb-2">
+          <div className="text-center text-gray-400 py-8 border border-gray-800/50 rounded-xl bg-[#0D0D0D]">
+            No tasks found for this release
+          </div>
         </div>
       )}
     </div>

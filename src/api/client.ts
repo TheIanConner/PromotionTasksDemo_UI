@@ -57,6 +57,11 @@ export const api = {
     return response.data;
   },
 
+  updateTask: async (task: PromotionTask): Promise<PromotionTask> => {
+    const response = await apiClient.post("/PromotionTasks", task);
+    return response.data;
+  },
+
   updateTaskStatus: async (
     taskId: number,
     status: TaskStatus
