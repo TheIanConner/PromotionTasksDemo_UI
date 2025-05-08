@@ -1,75 +1,16 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+/// <reference types="vite/client" />
+
+import axios, { AxiosError } from "axios";
 import { User, Release, PromotionTask, TaskStatus } from "../types";
 
-// Custom logger to handle API debugging
-const logApiCall = (method: string, url: string, data?: any) => {
-  console.log(
-    `🚀 API Call: ${method.toUpperCase()} ${url}`,
-    data ? { data } : ""
-  );
-};
-
-const logApiResponse = (response: AxiosResponse) => {
-  console.log(`✅ API Response (${response.status}):`, {
-    url: response.config.url,
-    method: response.config.method?.toUpperCase(),
-    data: response.data,
-    headers: response.headers,
-    duration: response.headers["x-response-time"] || "not available",
-  });
-};
-
-const logApiError = (error: AxiosError) => {
-  console.error(`❌ API Error:`, {
-    url: error.config?.url,
-    method: error.config?.method?.toUpperCase(),
-    statusCode: error.response?.status,
-    statusText: error.response?.statusText,
-    message: error.message,
-    data: error.response?.data,
-    request: {
-      headers: error.config?.headers,
-      data: error.config?.data,
-    },
-  });
-};
-
 const apiClient = axios.create({
-  baseURL: "/api", // TODO: Change to the correct URL based on the environment
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Add request interceptor for logging
-apiClient.interceptors.request.use(
-  (config) => {
-    logApiCall(
-      config.method || "unknown",
-      config.url || "unknown",
-      config.data
-    );
-    return config;
-  },
-  (error) => {
-    logApiError(error as AxiosError);
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for logging
-apiClient.interceptors.response.use(
-  (response) => {
-    logApiResponse(response);
-    return response;
-  },
-  (error: AxiosError) => {
-    logApiError(error);
-    return Promise.reject(error);
-  }
-);
-
-// Helper function to safely execute API calls with detailed error handling
+// Helper function to safely execute API calls with error handling
 const executeApiCall = async <T>(
   apiCall: () => Promise<T>,
   errorContext: string
@@ -78,28 +19,7 @@ const executeApiCall = async <T>(
     return await apiCall();
   } catch (error) {
     const axiosError = error as AxiosError;
-    console.error(`🔍 Detailed API Error in ${errorContext}:`, {
-      message: axiosError.message,
-      isNetworkError:
-        axiosError.code === "ECONNABORTED" || !axiosError.response,
-      timeout: axiosError.code === "ECONNABORTED",
-      requestConfig: {
-        url: axiosError.config?.url,
-        method: axiosError.config?.method,
-        headers: axiosError.config?.headers,
-        data: axiosError.config?.data,
-        timeout: axiosError.config?.timeout,
-      },
-      response: axiosError.response
-        ? {
-            status: axiosError.response.status,
-            statusText: axiosError.response.statusText,
-            data: axiosError.response.data,
-            headers: axiosError.response.headers,
-          }
-        : "No response received",
-      stack: axiosError.stack,
-    });
+    console.error(`Error in ${errorContext}:`, axiosError.message);
     throw error;
   }
 };

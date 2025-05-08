@@ -1,5 +1,5 @@
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -65,7 +65,7 @@ function App() {
               path="/login"
               element={
                 user ? (
-                  <Navigate to="/dashboard" />
+                  <Navigate to="/dashboard" replace />
                 ) : (
                   <Login onLogin={handleLogin} />
                 )
@@ -77,11 +77,12 @@ function App() {
                 user ? (
                   <Dashboard user={user} onLogout={handleLogout} />
                 ) : (
-                  <Navigate to="/login" />
+                  <Navigate to="/login" replace />
                 )
               }
             />
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </main>
       </div>

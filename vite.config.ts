@@ -15,15 +15,6 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "build",
     },
-    server: {
-      proxy: {
-        "/api": {
-          target:
-            "https://promotiontasksdemo-api-bvdudegdachcdddb.uksouth-01.azurewebsites.net", // || "http://localhost:5110",
-          changeOrigin: true,
-          secure: false,
-        },
-      },
-    },
+    base: "/",
   };
 });
