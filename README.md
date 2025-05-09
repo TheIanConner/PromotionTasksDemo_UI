@@ -91,6 +91,7 @@ Given more time, I would work next on the following:
 - Optimize bundle size and loading performance
 - Enhance accessibility compliance
 - Expand test coverage
+- Fix the running of the app in Playwright tests on Github. I'm more used to Azure pipelines so I ran out of time to sort this issue
 
 ## Getting Started
 
