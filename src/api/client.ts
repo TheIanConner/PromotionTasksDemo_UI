@@ -1,10 +1,32 @@
 /// <reference types="vite/client" />
 
 import axios, { AxiosError } from "axios";
-import { User, Release, PromotionTask, TaskStatus } from "../types";
+import {
+  User,
+  Release,
+  ReleaseType,
+  PromotionTask,
+  TaskStatus,
+  TaskPriority,
+} from "../types";
+
+// Get the API base URL from environment or use a default for testing
+const getApiBaseUrl = (): string => {
+  // Check if import.meta.env is available (Vite environment)
+  if (
+    typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_API_URL
+  ) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // Fallback for test environment
+  return "http://localhost:5110";
+};
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },
@@ -48,9 +70,12 @@ export const api = {
     }, "getReleasesByUserId");
   },
 
-  createRelease: async (
-    release: Omit<Release, "releaseId">
-  ): Promise<Release> => {
+  createRelease: async (release: {
+    userId: number;
+    title: string;
+    type: ReleaseType;
+    releaseDate: string;
+  }): Promise<Release> => {
     return executeApiCall(async () => {
       const response = await apiClient.post("/Release", release);
       return response.data;
@@ -59,7 +84,7 @@ export const api = {
 
   updateRelease: async (
     releaseId: number,
-    release: Partial<Release>
+    release: Partial<Omit<Release, "releaseId">>
   ): Promise<void> => {
     return executeApiCall(async () => {
       await apiClient.put(`/Release/${releaseId}`, release);
@@ -80,9 +105,12 @@ export const api = {
     }, "getPromotionTasks");
   },
 
-  createPromotionTask: async (
-    task: Omit<PromotionTask, "taskId">
-  ): Promise<PromotionTask> => {
+  createPromotionTask: async (task: {
+    releaseId: number;
+    status: TaskStatus;
+    priority: TaskPriority;
+    description: string;
+  }): Promise<PromotionTask> => {
     return executeApiCall(async () => {
       const response = await apiClient.post("/PromotionTasks", task);
       return response.data;
@@ -91,7 +119,7 @@ export const api = {
 
   updateTask: async (task: PromotionTask): Promise<PromotionTask> => {
     return executeApiCall(async () => {
-      const response = await apiClient.post("/PromotionTasks", task);
+      const response = await apiClient.post(`/PromotionTasks`, task);
       return response.data;
     }, "updateTask");
   },
@@ -111,7 +139,7 @@ export const api = {
 
   updateTaskPriority: async (
     taskId: number,
-    priority: number
+    priority: TaskPriority
   ): Promise<PromotionTask> => {
     return executeApiCall(async () => {
       const response = await apiClient.put(

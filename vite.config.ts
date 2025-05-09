@@ -16,5 +16,13 @@ export default defineConfig(({ mode }) => {
       outDir: "build",
     },
     base: "/",
+    server: {
+      port: 5174,
+      strictPort: true, // Don't try other ports if 5174 is taken
+    },
+    preview: {
+      port: 5174,
+      strictPort: true, // Don't try other ports if 5174 is taken
+    },
   };
 });
