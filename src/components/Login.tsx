@@ -80,7 +80,7 @@ export default function Login({ onLogin }: LoginProps) {
                   type="text"
                   required
                   className="appearance-none block w-full px-4 py-3 border border-gray-800 rounded-xl bg-[#0A0A0A]/50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                  placeholder="Test McApp"
+                  placeholder="Enter 'Ian Conner' for demo"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   aria-required="true"

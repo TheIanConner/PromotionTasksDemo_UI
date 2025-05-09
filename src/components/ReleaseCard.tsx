@@ -385,7 +385,10 @@ export default function ReleaseCard({
   };
 
   return (
-    <div className="bg-[#111111] border border-gray-800 rounded-2xl p-6 backdrop-blur-xl transition-colors hover:border-gray-700">
+    <div
+      id="release-card"
+      className="bg-[#111111] border border-gray-800 rounded-2xl p-3 sm:p-6 backdrop-blur-xl transition-colors hover:border-gray-700"
+    >
       {/* Generated Graphic with Album Art */}
       <div
         className="h-24 -mx-6 -mt-6 mb-6 rounded-t-2xl relative"
@@ -531,19 +534,20 @@ export default function ReleaseCard({
             {tasks.map((task) => (
               <div
                 key={task.taskId}
-                className={`bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 flex flex-wrap items-start justify-between group hover:border-gray-700 transition-colors relative ${
+                className={`bg-[#0A0A0A] border border-gray-800 rounded-xl p-4 flex flex-col sm:flex-row items-start justify-between group hover:border-gray-700 transition-colors relative ${
                   animatingTaskId === task.taskId
                     ? "task-complete-animation task-complete-shimmer"
                     : ""
                 }`}
               >
-                <div className="flex items-start space-x-3 flex-1 min-w-0">
+                <div className="flex items-start space-x-3 w-full">
                   <button
                     onClick={() => handleStatusUpdate(task.taskId, task.status)}
                     className="focus:outline-none transition-transform hover:scale-110 flex-shrink-0 mt-0.5"
                   >
                     {getStatusIcon(task.status)}
                   </button>
+
                   {editingTaskId === task.taskId ? (
                     <textarea
                       value={editText}
@@ -556,8 +560,7 @@ export default function ReleaseCard({
                           setEditingTaskId(null);
                         }
                       }}
-                      className="flex-1 w-full min-w-0 bg-[#1A1A1A] text-gray-300 px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 resize-none"
-                      rows={3}
+                      className="w-full bg-[#1A1A1A] text-gray-300 px-2 py-1 rounded border border-gray-700 focus:outline-none focus:border-blue-500 resize-none"
                       autoFocus
                     />
                   ) : (
@@ -577,47 +580,48 @@ export default function ReleaseCard({
                   )}
                 </div>
 
-                {/* Task Priority */}
-                <div className="flex-shrink-0 flex items-center gap-1">
-                  <button
-                    onClick={() => {
-                      if (task.priority > TaskPriority.Urgent) {
-                        handlePriorityUpdate(task.taskId, task.priority - 1);
-                      }
-                    }}
-                    className="text-gray-600 hover:text-white transition-colors p-1 focus:outline-none rounded"
-                    disabled={task.priority <= TaskPriority.Urgent}
-                    aria-label="Increase priority"
-                  >
-                    <ChevronUp className="w-4 h-4" aria-hidden="true" />
-                  </button>
+                {/* Task Priority and Delete Controls */}
+                <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end space-x-2 mt-3 sm:mt-0 sm:ml-4">
+                  <div className="flex items-center space-x-1 mx-auto sm:mx-0">
+                    <button
+                      onClick={() => {
+                        if (task.priority > TaskPriority.Urgent) {
+                          handlePriorityUpdate(task.taskId, task.priority - 1);
+                        }
+                      }}
+                      className="text-gray-600 hover:text-white transition-colors p-1 focus:outline-none rounded"
+                      disabled={task.priority <= TaskPriority.Urgent}
+                      aria-label="Increase priority"
+                    >
+                      <ChevronUp className="w-4 h-4" aria-hidden="true" />
+                    </button>
 
-                  <div
-                    className={`px-2 py-1 rounded-md text-xs ${getPriorityColor(
-                      task.priority as TaskPriority
-                    )}`}
-                    aria-label={`Priority: ${task.priority + 1}`}
-                  >
-                    {task.priority + 1}
+                    <div
+                      className={`px-2 py-1 rounded-md text-xs ${getPriorityColor(
+                        task.priority as TaskPriority
+                      )}`}
+                      aria-label={`Priority: ${task.priority + 1}`}
+                    >
+                      {task.priority + 1}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (task.priority < TaskPriority.Low) {
+                          handlePriorityUpdate(task.taskId, task.priority + 1);
+                        }
+                      }}
+                      className="text-gray-600 hover:text-white transition-colors p-1 focus:outline-none rounded"
+                      disabled={task.priority >= TaskPriority.Low}
+                      aria-label="Decrease priority"
+                    >
+                      <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                    </button>
                   </div>
 
                   <button
-                    onClick={() => {
-                      if (task.priority < TaskPriority.Low) {
-                        handlePriorityUpdate(task.taskId, task.priority + 1);
-                      }
-                    }}
-                    className="text-gray-600 hover:text-white transition-colors p-1 focus:outline-none rounded"
-                    disabled={task.priority >= TaskPriority.Low}
-                    aria-label="Decrease priority"
-                  >
-                    <ChevronDown className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                </div>
-                <div className="flex items-center">
-                  <button
                     onClick={() => handleDeleteTask(task.taskId)}
-                    className="text-gray-500 hover:text-red-400 transition-colors focus:outline-none p-1 ml-1 rounded-full hover:bg-red-500/10"
+                    className="text-gray-500 hover:text-red-400 transition-colors focus:outline-none p-1 rounded-full hover:bg-red-500/10"
                     title="Delete task"
                   >
                     <Trash2 className="w-4 h-4" />

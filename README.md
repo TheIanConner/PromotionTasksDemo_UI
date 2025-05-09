@@ -2,6 +2,10 @@
 
 A web application for music artists and labels to manage their release promotion tasks. This platform helps track and organize promotional activities for music releases.
 
+Can be viewed running on Azure agaisnt the hosted API, at: https://ambitious-desert-0df541703.6.azurestaticapps.net
+
+(Login with "Ian Conner" and any password)
+
 ## Features
 
 - **User Authentication**: Login system for artists
@@ -20,22 +24,23 @@ A web application for music artists and labels to manage their release promotion
 
 ## To-Do Improvements
 
+Given more time, I would work next on the following:
+
 **Authentication Enhancements**
 
-- (Out of scope for demo) Implement proper authentication (currently only checking username)
-- (Out of scope for demo) Add password reset functionality
-- (Out of scope for demo) Implement JWT token-based auth system
+- Implement proper authentication (currently only checking username)
+- Add password reset functionality
+- Implement JWT token-based auth system
 
 **API Integration**
 
-- Configure proper API endpoint URL based on environment
-- (Out of scope for demo) Implement API request caching for better performance
+- Implement API request caching for better performance
 
 **UI/UX Improvements**
 
 - Add dark/light theme toggle
 - Implement skeleton loading states
-- (Out of scope for demo) Create a guided onboarding experience for new users
+- Create a guided onboarding experience for new users
 
 **Feature Additions**
 
@@ -43,9 +48,8 @@ A web application for music artists and labels to manage their release promotion
 
 **Technical Improvements**
 
-- Implement comprehensive test coverage
 - Optimize bundle size and loading performance
-- (Out of scope for demo) Enhance accessibility compliance
+- Enhance accessibility compliance
 
 ## Getting Started
 
