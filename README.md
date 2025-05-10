@@ -9,8 +9,8 @@ A web application for music artists and labels to manage their release promotion
 
 - **User Authentication**: Login system for artists
 - **Dashboard Overview**: View all releases and promotion tasks in a centralized dashboard
-- **Release Management**: Create and manage music releases (singles, EPs, albums, mixtapes)
-- **Task Management**: Track promotion tasks with status updates (To-Do, In Progress, Done)
+- **Release Management**: View music release details (singles, EPs, albums, mixtapes)
+- **Task Management**: Track promotion tasks with status updates (To-Do, In Progress, Done).  Ability to create custom promotion tasks
 - **Priority System**: Assign and modify task priorities to focus on important activities
 - **Visual Celebration**: Animation effects when tasks are completed for positive reinforcement
 
@@ -82,16 +82,12 @@ Given more time, I would work next on the following:
 - Implement skeleton loading states
 - Create a guided onboarding experience for new users
 
-**Feature Additions**
-
-- Add ability to create custom promotion tasks
-
 **Technical Improvements**
 
 - Optimize bundle size and loading performance
 - Enhance accessibility compliance
 - Expand test coverage
-- Fix the running of the app in Playwright tests on Github. I'm more used to Azure pipelines so I ran out of time to sort this issue
+- Fix the running of the app's Playwright tests on Github. I'm more used to Azure pipelines so I ran out of time to sort this issue
 
 ## Getting Started
 
